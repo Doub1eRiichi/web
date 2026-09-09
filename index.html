@@ -1,0 +1,213 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>작혼 스탯 3경기</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f9fafb; --card:#ffffff; --border:#f3f4f6;
+  --ink:#111827; --dim:#6b7280; --faint:#9ca3af;
+  --indigo:#4f46e5; --bar:#818cf8; --track:#f3f4f6;
+}
+*{box-sizing:border-box}
+/* .grid/.dist 의 display 가 hidden 속성을 덮어쓰지 않도록 */
+[hidden]{display:none!important}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:'Noto Sans KR',-apple-system,BlinkMacSystemFont,'Malgun Gothic',sans-serif;
+  -webkit-font-smoothing:antialiased}
+.wrap{max-width:960px;margin:0 auto;padding:32px 16px 64px;display:flex;flex-direction:column;gap:24px}
+.head{display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:12px}
+.name-row{display:flex;align-items:center}
+#player{appearance:none;background:transparent;border:1px solid transparent;border-radius:8px;
+  padding:2px 34px 2px 8px;margin-left:-8px;
+  font:inherit;font-size:30px;font-weight:700;letter-spacing:-.02em;color:var(--ink);
+  cursor:pointer;max-width:100%;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'/></svg>");
+  background-repeat:no-repeat;background-position:right 8px center;background-size:20px}
+#player:hover{border-color:var(--border);background-color:var(--card)}
+#player:focus-visible{outline:2px solid var(--indigo);outline-offset:2px}
+.uid{margin:4px 0 0;font-size:14px;color:var(--faint)}
+.hero{display:flex;gap:16px}
+.hero>div{text-align:center}
+.num{font-size:24px;font-weight:700;color:#374151;line-height:1.2}
+.num.indigo{color:var(--indigo)}
+.cap{font-size:12px;color:var(--dim);margin-top:2px}
+.tabs{display:flex;gap:4px;flex-wrap:wrap;border-bottom:1px solid var(--border)}
+.tab{appearance:none;background:none;border:none;border-bottom:2px solid transparent;
+  padding:8px 14px;margin-bottom:-1px;font:inherit;font-size:14px;font-weight:500;
+  color:var(--dim);cursor:pointer}
+.tab:hover{color:var(--ink)}
+.tab.active{color:var(--indigo);border-bottom-color:var(--indigo)}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+.dist{display:grid;grid-template-columns:1fr;gap:16px}
+@media(min-width:640px){
+  .grid{grid-template-columns:repeat(3,1fr)}
+  .dist{grid-template-columns:repeat(3,1fr)}
+}
+.card{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:16px;
+  display:flex;flex-direction:column;gap:4px}
+.label{font-size:12px;font-weight:500;color:var(--dim)}
+.value{font-size:20px;font-weight:600;font-variant-numeric:tabular-nums}
+.dist-title{margin:0 0 12px;font-size:12px;font-weight:600;color:var(--dim)}
+.bars{display:flex;flex-direction:column;gap:12px}
+.bar-head{display:flex;justify-content:space-between;font-size:14px;margin-bottom:4px}
+.bar-head span:first-child{color:#374151}
+.bar-val{font-weight:500;font-variant-numeric:tabular-nums}
+.track{height:6px;background:var(--track);border-radius:9999px;overflow:hidden}
+.fill{height:100%;background:var(--bar);border-radius:9999px}
+.foot{border-top:1px solid var(--border);padding-top:16px;font-size:13px;color:var(--dim)}
+.foot p{margin:0 0 8px}
+.foot ul{margin:8px 0 0;padding-left:18px}
+summary{cursor:pointer}
+code{font:12px/1.5 Consolas,monospace;background:var(--border);padding:1px 5px;border-radius:3px}
+@media(prefers-color-scheme:dark){
+  :root{--bg:#111827;--card:#1f2937;--border:#374151;--ink:#f3f4f6;--dim:#9ca3af;
+        --faint:#6b7280;--indigo:#818cf8;--bar:#818cf8;--track:#374151}
+  .num{color:#e5e7eb}
+  .bar-head span:first-child{color:#d1d5db}
+  #player option{background:var(--card);color:var(--ink)}
+}
+</style>
+</head><body>
+<div class="wrap">
+<div class="head">
+<div>
+<div class="name-row">
+<select id="player" aria-label="선수 선택">
+<option value="0">페이클라나</option>
+<option value="1" selected>m18</option>
+<option value="2">페리냥이</option>
+<option value="3">유메코</option>
+</select>
+</div>
+<p class="uid">ID: <span id="uid"></span></p>
+</div>
+<div class="hero">
+<div><div class="num indigo" id="games"></div><div class="cap">반장</div></div>
+<div><div class="num" id="rank"></div><div class="cap">평균 순위</div></div>
+<div><div class="num" id="kyokus"></div><div class="cap">국</div></div>
+</div>
+</div>
+<div class="tabs">
+<button class="tab active" data-tab="basic">기본</button>
+<button class="tab" data-tab="riichi">리치</button>
+<button class="tab" data-tab="other">그외</button>
+<button class="tab" data-tab="distribution">분포</button>
+<button class="tab" data-tab="luck">행운도</button>
+</div>
+<div id="panels"></div>
+<div class="foot">
+<p>패보 3개 · 생성 2026-09-09 23:21</p>
+<details><summary>패보 목록</summary><ul>
+<li><code>260909-11b9fb1c-e6fc-4b5c-bb98-3414a1ca7168</code></li>
+<li><code>260909-d6f898ed-a25b-4e83-9d73-877c8af3b7b3</code></li>
+<li><code>260909-d78cabd2-ef44-4035-83f1-76f2e205f627</code></li>
+</ul></details>
+</div>
+</div>
+<script id="data" type="application/json">{"players": [{"name": "페이클라나", "account_id": 71290600, "stats": {"account_id": 71290600, "latest_name": "페이클라나", "games": 3, "kyokus": 37, "wins": 8, "dealins": 1, "riichi_count": 3, "furo_count": 12, "oya_count": 6, "total_delta_score": 66500, "avg_delta_per_game": 22166.666666666668, "win_rate": 0.21621621621621623, "dealin_rate": 0.02702702702702703, "dama_rate": 0.5, "ryukyoku_rate": 0.1891891891891892, "riichi_rate": 0.08108108108108109, "furo_rate": 0.32432432432432434, "ryukyoku_tenpai_rate": 0.42857142857142855, "avg_rank": 1.0, "avg_final_score": 62.166666666666664, "avg_start_shanten": 3.4864864864864864, "avg_win_score": 11700.0, "avg_ura_score": 0.0, "avg_ura_count": 0.0, "ura_rate": 0.0, "ura_balance": 0.0, "avg_dealin_score_raw": -5200.0, "avg_dealin_score_loss": 5200.0, "win_efficiency": 2529.72972972973, "dealin_loss": 140.54054054054055, "net_win_efficiency": 2389.1891891891896, "kyoku_avg": 1797.2972972972973, "avg_win_turn": 11.125, "avg_riichi_turn": 7.0, "tsumo_rate": 0.5, "avg_kaburi_raw": -1433.3333333333333, "avg_kaburi_loss": 1433.3333333333333, "painful_kaburi_rate": 0.16666666666666666, "painful_kaburi_avg": 12000.0, "riichi_dealin_rate": 0.0, "riichi_win_rate": 0.6666666666666666, "riichi_net_delta": 8866.666666666666, "riichi_income": 13800.0, "riichi_expense": 0, "first_riichi_rate": 1.0, "chase_riichi_rate": 0.0, "chased_riichi_rate": 0.6666666666666666, "riichi_ryukyoku_rate": 0.0, "ippatsu_rate": 0.3333333333333333, "furiten_riichi_rate": 0.0, "multi_wait_riichi_rate": 0.6666666666666666, "good_shape_riichi_rate": 0.6666666666666666, "riichi_wins": 2, "riichi_dealins": 0, "win_dama_count": 4, "win_riichi_count": 2, "win_furo_count": 2, "win_dama_ratio": 0.5, "win_riichi_ratio": 0.25, "win_furo_ratio": 0.25, "dealin_dama_count": 0, "dealin_riichi_count": 0, "dealin_furo_count": 1, "dealin_dama_ratio": 0.0, "dealin_riichi_ratio": 0.0, "dealin_furo_ratio": 1.0, "opponent_dama_count": 0, "opponent_riichi_count": 1, "opponent_furo_count": 0, "opponent_dama_ratio": 0.0, "opponent_riichi_ratio": 1.0, "opponent_furo_ratio": 0.0, "double_riichi_count": 0, "nagashimangan_count": 0}}, {"name": "m18", "account_id": 121644140, "stats": {"account_id": 121644140, "latest_name": "m18", "games": 3, "kyokus": 37, "wins": 6, "dealins": 9, "riichi_count": 10, "furo_count": 12, "oya_count": 6, "total_delta_score": -53800, "avg_delta_per_game": -17933.333333333332, "win_rate": 0.16216216216216217, "dealin_rate": 0.24324324324324326, "dama_rate": 0.0, "ryukyoku_rate": 0.1891891891891892, "riichi_rate": 0.2702702702702703, "furo_rate": 0.32432432432432434, "ryukyoku_tenpai_rate": 0.2857142857142857, "avg_rank": 2.6666666666666665, "avg_final_score": -22.933333333333337, "avg_start_shanten": 3.3783783783783785, "avg_win_score": 6066.666666666667, "avg_ura_score": 2350.0, "avg_ura_count": 0.75, "ura_rate": 0.5, "ura_balance": 2350.0, "avg_dealin_score_raw": -6066.666666666667, "avg_dealin_score_loss": 6066.666666666667, "win_efficiency": 983.7837837837839, "dealin_loss": 1475.6756756756758, "net_win_efficiency": -491.891891891892, "kyoku_avg": -1454.054054054054, "avg_win_turn": 12.333333333333334, "avg_riichi_turn": 9.5, "tsumo_rate": 0.6666666666666666, "avg_kaburi_raw": -166.66666666666666, "avg_kaburi_loss": 166.66666666666666, "painful_kaburi_rate": 0.0, "painful_kaburi_avg": 0, "riichi_dealin_rate": 0.3, "riichi_win_rate": 0.4, "riichi_net_delta": -2450.0, "riichi_income": 6150.0, "riichi_expense": 9175.0, "first_riichi_rate": 0.7, "chase_riichi_rate": 0.3, "chased_riichi_rate": 0.1, "riichi_ryukyoku_rate": 0.0, "ippatsu_rate": 0.0, "furiten_riichi_rate": 0.0, "multi_wait_riichi_rate": 0.9, "good_shape_riichi_rate": 0.3, "riichi_wins": 4, "riichi_dealins": 3, "win_dama_count": 0, "win_riichi_count": 4, "win_furo_count": 2, "win_dama_ratio": 0.0, "win_riichi_ratio": 0.6666666666666666, "win_furo_ratio": 0.3333333333333333, "dealin_dama_count": 4, "dealin_riichi_count": 3, "dealin_furo_count": 2, "dealin_dama_ratio": 0.4444444444444444, "dealin_riichi_ratio": 0.3333333333333333, "dealin_furo_ratio": 0.2222222222222222, "opponent_dama_count": 3, "opponent_riichi_count": 4, "opponent_furo_count": 2, "opponent_dama_ratio": 0.3333333333333333, "opponent_riichi_ratio": 0.4444444444444444, "opponent_furo_ratio": 0.2222222222222222, "double_riichi_count": 0, "nagashimangan_count": 0}}, {"name": "페리냥이", "account_id": 108782313, "stats": {"account_id": 108782313, "latest_name": "페리냥이", "games": 3, "kyokus": 37, "wins": 11, "dealins": 4, "riichi_count": 8, "furo_count": 13, "oya_count": 6, "total_delta_score": 6200, "avg_delta_per_game": 2066.6666666666665, "win_rate": 0.2972972972972973, "dealin_rate": 0.10810810810810811, "dama_rate": 0.18181818181818182, "ryukyoku_rate": 0.1891891891891892, "riichi_rate": 0.21621621621621623, "furo_rate": 0.35135135135135137, "ryukyoku_tenpai_rate": 0.5714285714285714, "avg_rank": 3.0, "avg_final_score": -11.266666666666666, "avg_start_shanten": 3.4054054054054053, "avg_win_score": 5318.181818181818, "avg_ura_score": 1100.0, "avg_ura_count": 0.4, "ura_rate": 0.4, "ura_balance": 1100.0, "avg_dealin_score_raw": -4400.0, "avg_dealin_score_loss": 4400.0, "win_efficiency": 1581.081081081081, "dealin_loss": 475.6756756756757, "net_win_efficiency": 1105.4054054054054, "kyoku_avg": 167.56756756756758, "avg_win_turn": 12.0, "avg_riichi_turn": 10.125, "tsumo_rate": 0.36363636363636365, "avg_kaburi_raw": -1983.3333333333333, "avg_kaburi_loss": 1983.3333333333333, "painful_kaburi_rate": 0.16666666666666666, "painful_kaburi_avg": 16000.0, "riichi_dealin_rate": 0.0, "riichi_win_rate": 0.625, "riichi_net_delta": 3512.5, "riichi_income": 5320.0, "riichi_expense": 0, "first_riichi_rate": 0.75, "chase_riichi_rate": 0.25, "chased_riichi_rate": 0.25, "riichi_ryukyoku_rate": 0.25, "ippatsu_rate": 0.0, "furiten_riichi_rate": 0.0, "multi_wait_riichi_rate": 0.75, "good_shape_riichi_rate": 0.625, "riichi_wins": 5, "riichi_dealins": 0, "win_dama_count": 2, "win_riichi_count": 5, "win_furo_count": 4, "win_dama_ratio": 0.18181818181818182, "win_riichi_ratio": 0.45454545454545453, "win_furo_ratio": 0.36363636363636365, "dealin_dama_count": 2, "dealin_riichi_count": 0, "dealin_furo_count": 2, "dealin_dama_ratio": 0.5, "dealin_riichi_ratio": 0.0, "dealin_furo_ratio": 0.5, "opponent_dama_count": 1, "opponent_riichi_count": 1, "opponent_furo_count": 2, "opponent_dama_ratio": 0.25, "opponent_riichi_ratio": 0.25, "opponent_furo_ratio": 0.5, "double_riichi_count": 0, "nagashimangan_count": 0}}, {"name": "유메코", "account_id": 74724791, "stats": {"account_id": 74724791, "latest_name": "ㅤ유메코ㅤ", "games": 3, "kyokus": 37, "wins": 5, "dealins": 3, "riichi_count": 8, "furo_count": 12, "oya_count": 6, "total_delta_score": -18900, "avg_delta_per_game": -6300.0, "win_rate": 0.13513513513513514, "dealin_rate": 0.08108108108108109, "dama_rate": 0.0, "ryukyoku_rate": 0.1891891891891892, "riichi_rate": 0.21621621621621623, "furo_rate": 0.32432432432432434, "ryukyoku_tenpai_rate": 0.42857142857142855, "avg_rank": 3.3333333333333335, "avg_final_score": -27.96666666666667, "avg_start_shanten": 3.5675675675675675, "avg_win_score": 5780.0, "avg_ura_score": 0.0, "avg_ura_count": 0.0, "ura_rate": 0.0, "ura_balance": 0.0, "avg_dealin_score_raw": -3566.6666666666665, "avg_dealin_score_loss": 3566.6666666666665, "win_efficiency": 781.0810810810812, "dealin_loss": 289.18918918918916, "net_win_efficiency": 491.891891891892, "kyoku_avg": -510.81081081081084, "avg_win_turn": 11.6, "avg_riichi_turn": 9.625, "tsumo_rate": 0.2, "avg_kaburi_raw": -733.3333333333334, "avg_kaburi_loss": 733.3333333333334, "painful_kaburi_rate": 0.0, "painful_kaburi_avg": 0, "riichi_dealin_rate": 0.0, "riichi_win_rate": 0.375, "riichi_net_delta": 1087.5, "riichi_income": 7733.333333333333, "riichi_expense": 5200.0, "first_riichi_rate": 0.75, "chase_riichi_rate": 0.25, "chased_riichi_rate": 0.25, "riichi_ryukyoku_rate": 0.125, "ippatsu_rate": 0.0, "furiten_riichi_rate": 0.0, "multi_wait_riichi_rate": 0.875, "good_shape_riichi_rate": 0.625, "riichi_wins": 3, "riichi_dealins": 0, "win_dama_count": 0, "win_riichi_count": 3, "win_furo_count": 2, "win_dama_ratio": 0.0, "win_riichi_ratio": 0.6, "win_furo_ratio": 0.4, "dealin_dama_count": 2, "dealin_riichi_count": 0, "dealin_furo_count": 1, "dealin_dama_ratio": 0.6666666666666666, "dealin_riichi_ratio": 0.0, "dealin_furo_ratio": 0.3333333333333333, "opponent_dama_count": 0, "opponent_riichi_count": 2, "opponent_furo_count": 1, "opponent_dama_ratio": 0.0, "opponent_riichi_ratio": 0.6666666666666666, "opponent_furo_ratio": 0.3333333333333333, "double_riichi_count": 0, "nagashimangan_count": 0}}], "tabs": [{"key": "basic", "label": "기본", "metrics": [["화료율", "win_rate", "percent"], ["방총률", "dealin_rate", "percent"], ["쯔모율", "tsumo_rate", "percent"], ["다마율", "dama_rate", "percent"], ["유국률", "ryukyoku_rate", "percent"], ["유국 텐파이율", "ryukyoku_tenpai_rate", "percent"], ["후로율", "furo_rate", "percent"], ["리치율", "riichi_rate", "percent"], ["화료순", "avg_win_turn", "float"], ["평균 화료", "avg_win_score", "float"], ["평균 방총", "avg_dealin_score_loss", "float"], ["평균 순위", "avg_rank", "float"], ["평균 점수", "avg_final_score", "float"]]}, {"key": "riichi", "label": "리치", "metrics": [["리치율", "riichi_rate", "percent"], ["리치화료율", "riichi_win_rate", "percent"], ["리치방총율", "riichi_dealin_rate", "percent"], ["리치 수지", "riichi_net_delta", "float"], ["리치 수입", "riichi_income", "float"], ["리치 지출", "riichi_expense", "float"], ["선제리치율", "first_riichi_rate", "percent"], ["추격리치율", "chase_riichi_rate", "percent"], ["피추격률", "chased_riichi_rate", "percent"], ["리치순", "avg_riichi_turn", "float"], ["리치 유국율", "riichi_ryukyoku_rate", "percent"], ["일발률", "ippatsu_rate", "percent"], ["후리텐률", "furiten_riichi_rate", "percent"], ["리치 다면", "multi_wait_riichi_rate", "percent"], ["리치 양형", "good_shape_riichi_rate", "percent"]]}, {"key": "other", "label": "그외", "metrics": [["뒷도라율", "ura_rate", "percent"], ["뒷도라 수지", "ura_balance", "float"], ["평균 뒷도라 수", "avg_ura_count", "float"], ["아픈 오야카부리율", "painful_kaburi_rate", "percent"], ["아픈 오야카부리 평균", "painful_kaburi_avg", "float"], ["화료 효율", "win_efficiency", "float"], ["방총 손실", "dealin_loss", "float"], ["알짜 화료 효율", "net_win_efficiency", "float"], ["국수지", "kyoku_avg", "float"], ["총합 반장 수", "games", "int"], ["총합 국수", "kyokus", "int"]]}, {"key": "distribution", "label": "분포", "metrics": []}, {"key": "luck", "label": "행운도", "metrics": [["평균 배패 샹텐수", "avg_start_shanten", "float"], ["역만 횟수", "yakuman_count", "int"], ["더블리치 횟수", "double_riichi_count", "int"], ["나가시만관 횟수", "nagashimangan_count", "int"]]}], "distribution": [["화료시", [["리치", "win_riichi_ratio"], ["후로", "win_furo_ratio"], ["다마", "win_dama_ratio"]]], ["방총시", [["리치", "dealin_riichi_ratio"], ["후로", "dealin_furo_ratio"], ["멘젠", "dealin_dama_ratio"]]], ["방총 상대", [["리치", "opponent_riichi_ratio"], ["후로", "opponent_furo_ratio"], ["다마", "opponent_dama_ratio"]]]], "defaultIndex": 1}</script>
+<script>
+(function () {
+  var DATA = JSON.parse(document.getElementById('data').textContent);
+  var select = document.getElementById('player');
+  var panels = document.getElementById('panels');
+  var activeTab = DATA.tabs[0].key;
+
+  // web/src/lib/format.ts 의 formatValue / formatPercent 와 동일
+  function formatValue(value, kind) {
+    if (value === null || value === undefined || isNaN(value)) return '-';
+    if (kind === 'int') return Math.round(value).toLocaleString('ko-KR');
+    if (kind === 'percent') return (value * 100).toFixed(2) + '%';
+    return value.toFixed(2);
+  }
+  function formatPercent(value) {
+    if (value === null || value === undefined || isNaN(value)) return '-';
+    return (value * 100).toFixed(1) + '%';
+  }
+
+  function el(tag, className, text) {
+    var node = document.createElement(tag);
+    if (className) node.className = className;
+    if (text !== undefined) node.textContent = text;
+    return node;
+  }
+
+  function metricCard(label, value, kind) {
+    var card = el('div', 'card');
+    card.appendChild(el('span', 'label', label));
+    card.appendChild(el('span', 'value', formatValue(value, kind)));
+    return card;
+  }
+
+  function distPanel(stats) {
+    var wrap = el('div', 'dist');
+    DATA.distribution.forEach(function (section) {
+      var title = section[0], items = section[1];
+      var card = el('div', 'card');
+      card.appendChild(el('p', 'dist-title', title));
+      var bars = el('div', 'bars');
+      items.forEach(function (item) {
+        var label = item[0], value = stats[item[1]];
+        var row = el('div', 'bar-row');
+        var head = el('div', 'bar-head');
+        head.appendChild(el('span', null, label));
+        head.appendChild(el('span', 'bar-val', formatPercent(value)));
+        var track = el('div', 'track');
+        var fill = el('div', 'fill');
+        fill.style.width = Math.min((value || 0) * 100, 100).toFixed(1) + '%';
+        track.appendChild(fill);
+        row.appendChild(head);
+        row.appendChild(track);
+        bars.appendChild(row);
+      });
+      card.appendChild(bars);
+      wrap.appendChild(card);
+    });
+    return wrap;
+  }
+
+  function render() {
+    var player = DATA.players[Number(select.value)];
+    var stats = player.stats;
+
+    document.getElementById('uid').textContent = player.account_id;
+    document.getElementById('games').textContent = stats.games;
+    document.getElementById('kyokus').textContent = stats.kyokus;
+    document.getElementById('rank').textContent =
+      stats.avg_rank === null || stats.avg_rank === undefined ? '-' : stats.avg_rank.toFixed(2);
+    document.title = player.name + ' 스탯 ' + stats.games + '경기';
+
+    panels.textContent = '';
+    DATA.tabs.forEach(function (tab) {
+      var panel;
+      if (tab.key === 'distribution') {
+        panel = distPanel(stats);
+      } else {
+        panel = el('div', 'grid');
+        tab.metrics.forEach(function (metric) {
+          panel.appendChild(metricCard(metric[0], stats[metric[1]], metric[2]));
+        });
+      }
+      panel.id = 'panel-' + tab.key;
+      panel.hidden = tab.key !== activeTab;
+      panels.appendChild(panel);
+    });
+  }
+
+  document.querySelectorAll('.tab').forEach(function (button) {
+    button.addEventListener('click', function () {
+      activeTab = button.dataset.tab;
+      document.querySelectorAll('.tab').forEach(function (other) {
+        other.classList.toggle('active', other === button);
+      });
+      document.querySelectorAll('#panels > *').forEach(function (panel) {
+        panel.hidden = panel.id !== 'panel-' + activeTab;
+      });
+    });
+  });
+
+  select.addEventListener('change', render);
+  render();
+})();
+</script>
+</body></html>
